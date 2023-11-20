@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use JWTAuth;
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Providers\SendmailEvent;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -39,6 +40,18 @@ class AuthController extends Controller
             $user->user_type = 'PATIENT';
             $user->password = Hash::make($request->password);
             $user->save();
+
+            $details = [
+                'title' => 'Welcome to Health App',
+                'subject' => 'Registration Successful',
+                'content' => ['date' => now()],
+                'email' => $user->email,
+                'name' => $user->first_name . ' ' . $user->last_name,
+                'sending_type' => 'Verify Email',
+                'template' => 'emails/welcome'
+            ];
+
+            event(new SendmailEvent($details));
 
             $credentials = $request->only('email', 'password');
 
