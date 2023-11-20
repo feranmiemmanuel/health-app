@@ -54,7 +54,7 @@ class AuthController extends Controller
                 'user_type' => $user->user_type,
                 'user_phone' => $user->phone,
                 'user_email' => $user->email,
-            ]);
+            ], 201);
         } catch (\Throwable $th) {
             return response()->json([
                 'success' => false,
@@ -78,7 +78,14 @@ class AuthController extends Controller
         $credentials = $request->only('email', 'password');
 
         $bearertoken = auth('api')->attempt($credentials);
+        if (!$bearertoken) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Incorrect Details'
+            ], 400);
+        }
         return response()->json([
+            'success' => true,
             'message' => 'Login Successful',
             'token_type' => 'bearer',
             'access_token' => $bearertoken,
@@ -87,6 +94,6 @@ class AuthController extends Controller
             'user_type' => auth()->user()->user_type,
             'user_phone' => auth()->user()->phone,
             'user_email' => auth()->user()->email,
-        ]);
+        ], 200);
     }
 }
