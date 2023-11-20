@@ -6,14 +6,7 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
-    <!--[if mso]>
-    <xml>
-        <o:officedocumentsettings>
-          <o:pixelsperinch>96</o:pixelsperinch>
-        </o:officedocumentsettings>
-    </xml>
-    <![endif]-->
-    <title>Welcome to [Monicredit] 👋</title>
+    <title>Welcome to {{env('APP_NAME')}}👋</title>
     <link href="https://fonts.googleapis.com/css?family=Montserrat:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,500;1,600;1,700" rel="stylesheet" media="screen">
     <style>
         .hover-underline:hover {
@@ -38,7 +31,7 @@
     </style>
   </head>
   <body style="margin: 0; width: 100%; padding: 0; word-break: break-word; -webkit-font-smoothing: antialiased; background-color: #eceff1;">
-      <div style="font-family: 'Montserrat', sans-serif; mso-line-height-rule: exactly; display: none;">We are pleased to welcome you to {{env('APP_NAME')}}</div>
+      <div style="font-family: 'Montserrat', sans-serif; mso-line-height-rule: exactly; display: none;">We are happy to welcome you to {{env('APP_NAME')}}</div>
       <div role="article" aria-roledescription="email" aria-label="Welcome 👋" lang="en" style="font-family: 'Montserrat', sans-serif; mso-line-height-rule: exactly;">
          <table style="width: 100%; font-family: Montserrat, -apple-system, 'Segoe UI', sans-serif;" cellpadding="0" cellspacing="0" role="presentation">
             <tr>
