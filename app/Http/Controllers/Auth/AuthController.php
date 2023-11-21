@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Auth;
 
 use JWTAuth;
 use App\Models\User;
+use App\Models\Patient;
+use App\Models\Hospital;
+use App\Models\HospitalUser;
 use Illuminate\Http\Request;
 use App\Providers\SendmailEvent;
 use Illuminate\Support\Facades\DB;
@@ -25,14 +28,17 @@ class AuthController extends Controller
                     'last_name' => 'required|string',
                     'email' => 'required|string|email|max:255|unique:users,email',
                     'phone' => 'required|unique:users,phone',
-                    'password' => 'required|string|confirmed|min:6'
+                    'password' => 'required|string|confirmed|min:6',
+                    'hospital_id' => 'required|exists:hospitals,id'
                 ]
             );
             if ($validator->fails()) {
                 DB::rollBack();
                 return response()->json(['success' => false, 'message' => $validator->errors()->first()], 400);
             }
+            $userId = uniqid('US');
             $user = new User();
+            $user->id = $userId;
             $user->first_name = $request->first_name;
             $user->last_name = $request->last_name;
             $user->email = $request->email;
@@ -40,6 +46,35 @@ class AuthController extends Controller
             $user->user_type = 'PATIENT';
             $user->password = Hash::make($request->password);
             $user->save();
+            $user = $user->refresh();
+            // dd($user);
+
+            $patient = new Patient();
+            $patient->user_id = $userId;
+            $patient->save();
+
+            $userHospital = new HospitalUser();
+            $userHospital->patient_id = $userId;
+            $userHospital->hospital_id = $request->hospital_id;
+            $userHospital->save();
+
+            $hospital = Hospital::where('id', $request->hospital_id)->first();
+
+            $details = [
+                'title' => 'New Patient!',
+                'subject' => 'You have a new Patient',
+                'content' => [
+                    'date' => now(),
+                    'user_name' => $user->first_name . ' ' . $user->last_name,
+                    'email' => $user->email,
+                ],
+                'email' => $hospital->email,
+                'name' => $hospital->name,
+                'sending_type' => 'Verify Email',
+                'template' => 'emails/newPatient'
+            ];
+
+            event(new SendmailEvent($details));
 
             $details = [
                 'title' => 'Welcome to Health App',
@@ -69,6 +104,7 @@ class AuthController extends Controller
                 'user_email' => $user->email,
             ], 201);
         } catch (\Throwable $th) {
+            DB::rollBack();
             return response()->json([
                 'success' => false,
                 'message' => $th->getMessage()

@@ -18,11 +18,13 @@ class User extends Authenticatable implements JWTSubject
      *
      * @var array<int, string>
      */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
+    // protected $fillable = [
+    //     'name',
+    //     'email',
+    //     'password',
+    // ];
+    protected $guarded = [];
+    public $incrementing = false;
 
     /**
      * The attributes that should be hidden for serialization.
@@ -43,14 +45,6 @@ class User extends Authenticatable implements JWTSubject
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
-    
-    public static function boot()
-    {
-        parent::boot();
-        static::creating(function ($user) {
-            $user->id = uniqid('US');
-        });
-    }
 
     public function getJWTIdentifier()
     {
@@ -60,5 +54,16 @@ class User extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims()
     {
         return [];
+    }
+
+    public function patientHospitals()
+    {
+        return $this->belongsToMany(Hospital::class, 'user_hospitals', 'patient_id', 'hospital_id');
+    }
+
+    public function doctorHospitals()
+    {
+        return $this->belongsToMany(Hospital::class, 'user_hospitals', 'doctor_id', 'hospital_id')
+                    ->using(HospitalUser::class);
     }
 }

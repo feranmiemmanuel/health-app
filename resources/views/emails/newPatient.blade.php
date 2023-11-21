@@ -7,11 +7,11 @@
             <td class="sm-px-24" style="mso-line-height-rule: exactly; border-radius: 4px; background-color: #ffffff; padding: 48px; text-align: left; font-family: Montserrat, -apple-system, 'Segoe UI', sans-serif; font-size: 14px; line-height: 24px; color: #626262;">
                <p style="font-family: 'Montserrat', sans-serif; mso-line-height-rule: exactly; margin-bottom: 3; font-size: 20px; font-weight: 600;">Dear <span style="font-weight: 700; color: #ff5850;">{{isset($name) ? $name : 'Valued Customer'}}!</span></p>
                <p class="sm-leading-32" style="font-family: 'Montserrat', sans-serif; mso-line-height-rule: exactly; margin: 0; margin-bottom: 24px; font-size: 20px; font-weight: 600; color: #263238;">
-                  🏆 Welcome to {{env('APP_NAME')}}
+                  🏆 You have a new patient!!!
                </p>
                <p style="font-family: 'Montserrat', sans-serif; mso-line-height-rule: exactly; margin: 0; margin-top: 24px; margin-bottom: 24px;">
-                  <span style="font-weight: 600;">Welcome</span>
-                  Health App🤩. We're happy to have you here. Do proceed to the app to complete your onboarding process. We're here to help🤩
+                  <span style="font-weight: 600;">{{$content['user_name']}} </span>
+                  just signed up for your service on {{env('APP_NAME')}} 🤩 with this email: {{$content['email']}}. Kindly proceed to the app to complete procedures. 
                </p>
                <table style="width: 100%;" cellpadding="0" cellspacing="0" role="presentation">
                   <tr>
