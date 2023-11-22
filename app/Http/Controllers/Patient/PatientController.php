@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Patient;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\PatientBiodataResource;
 use App\Models\Patient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -57,7 +58,11 @@ class PatientController extends Controller
             'user.patientHospitals',
             'user.patientHospitals.doctors'
         ])->where('user_id', auth()->id())->first();
-
-        return $patient;
+        return response()->json([
+            'success' => true,
+            'message' => 'Bio data fetched successfully',
+            'data' => new PatientBiodataResource($patient)
+        ]);
+        // return $patient;
     }
 }
