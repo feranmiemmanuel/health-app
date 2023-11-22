@@ -21,7 +21,9 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // });
 Route::prefix('auth')->group(function () {
-    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('patients/register', [AuthController::class, 'register']);
+    Route::post('doctors/register', [AuthController::class, 'doctorRegistration']);
+
     Route::post('/login', [AuthController::class, 'login']);
 });
 

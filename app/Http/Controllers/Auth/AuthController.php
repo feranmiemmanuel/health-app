@@ -145,4 +145,81 @@ class AuthController extends Controller
             'user_email' => auth()->user()->email,
         ], 200);
     }
+
+    public function doctorRegistration(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            $validator = Validator::make(
+                $request->all(),
+                [
+                    'first_name' => 'required|string',
+                    'last_name' => 'required|string',
+                    'email' => 'required|string|email|max:255|unique:users,email',
+                    'phone' => 'required|unique:users,phone',
+                    'password' => 'required|string|confirmed|min:6',
+                    'hospital_id' => 'required|exists:hospitals,id'
+                ]
+            );
+            if ($validator->fails()) {
+                DB::rollBack();
+                return response()->json(['success' => false, 'message' => $validator->errors()->first()], 400);
+            }
+            $userId = uniqid('US');
+            $user = new User();
+            $user->id = $userId;
+            $user->first_name = $request->first_name;
+            $user->last_name = $request->last_name;
+            $user->email = $request->email;
+            $user->phone = $request->phone;
+            $user->user_type = 'DOCTOR';
+            $user->password = Hash::make($request->password);
+            $user->save();
+            $user = $user->refresh();
+            // dd($user);
+
+            $patient = new Patient();
+            $patient->user_id = $userId;
+            $patient->save();
+
+            $userHospital = new HospitalUser();
+            $userHospital->doctor_id = $userId;
+            $userHospital->hospital_id = $request->hospital_id;
+            $userHospital->save();
+
+            $details = [
+                'title' => 'Welcome to Health App',
+                'subject' => 'Registration Successful',
+                'content' => ['date' => now()],
+                'email' => $user->email,
+                'name' => $user->first_name . ' ' . $user->last_name,
+                'sending_type' => 'Verify Email',
+                'template' => 'emails/welcome'
+            ];
+
+            event(new SendmailEvent($details));
+
+            $credentials = $request->only('email', 'password');
+
+            $bearertoken = auth('api')->attempt($credentials);
+
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'Registration is Successful',
+                'access_token' => $bearertoken,
+                'first_name' => $user->first_name,
+                'last_name' => $user->last_name,
+                'user_type' => $user->user_type,
+                'user_phone' => $user->phone,
+                'user_email' => $user->email,
+            ], 201);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ], 400);
+        }
+    }
 }
