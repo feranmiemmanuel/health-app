@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Hospital\HospitalController;
+use App\Http\Controllers\Patient\PatientController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -25,3 +26,10 @@ Route::prefix('auth')->group(function () {
 });
 
 Route::get('/get-something', [HospitalController::class, 'fetchHospital']);
+
+Route::middleware('auth.api')->group(function () {
+    Route::prefix('patient')->group(function () {
+        Route::post('/bio-data', [PatientController::class, 'bioData']);
+        Route::get('/bio-data', [PatientController::class, 'fetchBioData']);
+    });
+});

@@ -19,6 +19,7 @@ return new class extends Migration
             $table->timestamps();
             $table->foreign(['patient_id'])->references(['id'])->on('users')->onDelete('RESTRICT');
             $table->foreign(['doctor_id'])->references(['id'])->on('users')->onDelete('RESTRICT');
+            $table->foreign(['hospital_id'])->references(['id'])->on('hospitals')->onDelete('RESTRICT');
         });
     }
 

@@ -23,8 +23,8 @@ return new class extends Migration
             $table->string('emergency_contact_name')->nullable();
             $table->string('emergency_contact_phone')->nullable();
             $table->string('emergency_contact_email')->nullable();
-            $table->string('allergy')->nullable();
-            $table->string('sickness')->nullable();
+            $table->longText('allergies')->nullable();
+            $table->longText('condition')->nullable();
             $table->enum('status', ['ACTIVE', 'PENDING', 'INACTIVE'])->default('ACTIVE');
             $table->timestamps();
             $table->foreign(['user_id'])->references(['id'])->on('users')->onDelete('RESTRICT');

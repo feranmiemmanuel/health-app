@@ -16,6 +16,7 @@ class HospitalSeeder extends Seeder
         $hospital = new Hospital();
         $hospital->name = 'Hospital1';
         $hospital->email = 'admin@health-app.ng';
+        $hospital->phone = '+234ey7473783';
         $hospital->save();
     }
 }
