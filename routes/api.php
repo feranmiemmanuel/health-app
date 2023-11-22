@@ -34,4 +34,8 @@ Route::middleware('auth.api')->group(function () {
         Route::post('/bio-data', [PatientController::class, 'bioData']);
         Route::get('/bio-data', [PatientController::class, 'fetchBioData']);
     });
+    Route::prefix('doctor')->group(function () {
+        Route::get('/patients', [HospitalController::class, 'fetchHospitalPatients']);
+        Route::get('/patients/bio-data', [HospitalController::class, 'fetchHospitalPatientsBioData']);
+    });
 });
