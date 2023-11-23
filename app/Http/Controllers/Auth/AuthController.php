@@ -3,15 +3,16 @@
 namespace App\Http\Controllers\Auth;
 
 use JWTAuth;
+use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Patient;
 use App\Models\Hospital;
 use App\Models\HospitalUser;
 use Illuminate\Http\Request;
+use App\Models\PasswordReset;
 use App\Providers\SendmailEvent;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
-use App\Models\PasswordReset;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -233,7 +234,6 @@ class AuthController extends Controller
             ]
         );
         if ($validator->fails()) {
-            DB::rollBack();
             return response()->json(['success' => false, 'message' => $validator->errors()->first()], 400);
         }
 
@@ -242,9 +242,8 @@ class AuthController extends Controller
         if (!$passwordReset) {
             $passwordReset = new PasswordReset();
             $passwordReset->email = $request->email;
-            $passwordReset->token = $token;
-            $passwordReset->save();
         }
+        $passwordReset->created_at = now();
         $passwordReset->token = $token;
         $passwordReset->save();
         $user = User::where('email', $request->email)->first();
@@ -267,4 +266,58 @@ class AuthController extends Controller
             'message' => 'Token Sent Successfully'
         ]);
     }
+
+    public function resetPassword(Request $request)
+    {
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'token' => 'required|string|exists:password_reset_tokens,token',
+                'password' => 'required|string|confirmed|min:6',
+            ]
+        );
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'message' => $validator->errors()->first()], 400);
+        }
+
+        $token = PasswordReset::where('token', $request->token)->first();
+        $tokenCreationTime = Carbon::parse($token->created_at);
+        $currentTime = Carbon::now();
+        $diffInMinutes = $currentTime->diffInMinutes($tokenCreationTime);
+        if ($diffInMinutes > 7) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Token Expired'
+            ], 400);
+        }
+        $user = User::where('email', $token->email)->first();
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        $token->delete();
+
+        $details = [
+            'title' => 'Password Reset',
+            'subject' => 'Password Reset Successfully',
+            'content' => [
+                'date' => now(),
+            ],
+            'email' => $user->email,
+            'name' => $user->first_name . ' ' . $user->last_name,
+            'sending_type' => 'Verify Email',
+            'template' => 'emails/passwordReset'
+        ];
+
+        event(new SendmailEvent($details));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password Reset Successfully. Kindly continue to login'
+        ]);
+    }
+
+    // public function checkReminder(Request $request)
+    // {
+    //     return dispatch(new FetchRemeinderJob);
+    // }
 }
