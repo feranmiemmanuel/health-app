@@ -24,7 +24,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('auth')->group(function () {
     Route::post('patients/register', [AuthController::class, 'register']);
     Route::post('doctors/register', [AuthController::class, 'doctorRegistration']);
-
+    Route::post('/send-password-reset-token', [AuthController::class, 'sendToken']);
     Route::post('/login', [AuthController::class, 'login']);
 });
 

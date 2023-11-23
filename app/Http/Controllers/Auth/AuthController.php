@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use App\Providers\SendmailEvent;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Models\PasswordReset;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -221,5 +222,49 @@ class AuthController extends Controller
                 'message' => $th->getMessage()
             ], 400);
         }
+    }
+
+    public function sendToken(Request $request)
+    {
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'email' => 'required|string|email|max:255|exists:users,email',
+            ]
+        );
+        if ($validator->fails()) {
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => $validator->errors()->first()], 400);
+        }
+
+        $token = uniqid();
+        $passwordReset = PasswordReset::where('email', $request->email)->first();
+        if (!$passwordReset) {
+            $passwordReset = new PasswordReset();
+            $passwordReset->email = $request->email;
+            $passwordReset->token = $token;
+            $passwordReset->save();
+        }
+        $passwordReset->token = $token;
+        $passwordReset->save();
+        $user = User::where('email', $request->email)->first();
+        $details = [
+            'title' => 'Password Reset',
+            'subject' => 'Password Reset Token',
+            'content' => [
+                'date' => now(),
+                'token' => $token,
+            ],
+            'email' => $user->email,
+            'name' => $user->first_name . ' ' . $user->last_name,
+            'sending_type' => 'Verify Email',
+            'template' => 'emails/passwordResetToken'
+        ];
+
+        event(new SendmailEvent($details));
+        return response()->json([
+            'success' => true,
+            'message' => 'Token Sent Successfully'
+        ]);
     }
 }
