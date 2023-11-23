@@ -40,6 +40,7 @@ class RemindersController extends Controller
         $reminder->user_id = auth()->id();
         $reminder->medication_id = $medId;
         $reminder->dosage_frequency = $request->dosage_frequency;
+        $reminder->next_reminder_at = $this->calculateNextReminder($request->dosage_frequency);
         $reminder->save();
 
         $frequency = '';
@@ -126,6 +127,7 @@ class RemindersController extends Controller
         $reminder->user_id = $patient->user_id;
         $reminder->medication_id = $medId;
         $reminder->dosage_frequency = $request->dosage_frequency;
+        $reminder->next_reminder_at = $this->calculateNextReminder($request->dosage_frequency);
         $reminder->save();
 
         $user = User::where('id', $patient->user_id)->first();
@@ -194,5 +196,26 @@ class RemindersController extends Controller
             'message' => 'Medications Fetched Successfully',
             'data' => PatientMedicationResource::collection($medications)->response()->getData(true)
         ]);
+    }
+
+
+    public function calculateNextReminder($dosageFrequency) 
+    {
+        $currentTime = time(); // Get current timestamp
+        switch ($dosageFrequency) {
+            case 'ONCE_DAILY':
+                // Calculate next reminder in 24 hours (once a day)
+                return date('Y-m-d H:i:s', strtotime('+24 hours', $currentTime));
+                break;
+            case 'TWICE_DAILY':
+                // Calculate next reminder in 12 hours (twice a day)
+                return date('Y-m-d H:i:s', strtotime('+12 hours', $currentTime));
+                break;
+            case 'THRICE_DAILY':
+                // Calculate next reminder in 8 hours (three times a day)
+                return date('Y-m-d H:i:s', strtotime('+8 hours', $currentTime));
+                break;
+            // Add more cases for other dosage frequencies if needed
+        }
     }
 }

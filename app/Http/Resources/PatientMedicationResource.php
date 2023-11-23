@@ -30,7 +30,8 @@ class PatientMedicationResource extends JsonResource
             'drug_name' => $this->name,
             'dosage' => $this->dosage,
             'status' => $this->status,
-            'dosage_frequency' => $frequency
+            'dosage_frequency' => $frequency,
+            'next_reminder' => $this->reminder->next_reminder_at
         ];
     }
 }
