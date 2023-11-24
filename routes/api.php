@@ -29,7 +29,7 @@ Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
 });
 
-Route::get('/get-something', [HospitalController::class, 'fetchHospital']);
+Route::get('/fetch-due-reminders', [RemindersController::class, 'fetchDueReminders']);
 
 Route::middleware('auth.api')->group(function () {
     Route::prefix('patient')->group(function () {

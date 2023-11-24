@@ -2,15 +2,19 @@
 
 namespace App\Http\Controllers\Reminders;
 
+use App\Models\User;
 use App\Models\Patient;
 use App\Models\Reminder;
 use App\Models\Medication;
 use Illuminate\Http\Request;
+use App\Jobs\FetchRemindersJob;
+use App\Models\ReminderHistory;
 use App\Providers\SendmailEvent;
+use App\Jobs\ProcessRemindersJob;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\PatientMedicationResource;
-use App\Models\User;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Resources\PatientMedicationResource;
+use Illuminate\Support\Facades\Log;
 
 class RemindersController extends Controller
 {
@@ -198,22 +202,64 @@ class RemindersController extends Controller
         ]);
     }
 
+    public function fetchDueReminders()
+    {
+        dispatch(new FetchRemindersJob());
+        return true;
+    }
+
+    public function processDueReminder($reminder)
+    {
+        $user = User::where('id', $reminder[0]->user_id)->first();
+        $medication = Medication::where('id', $reminder[0]->medication_id)->first();
+        //send mail
+        $details = [
+            'title' => 'Reminder!',
+            'subject' => 'Use Your Drugs!',
+            'content' => [
+                'drug_name' => $medication->drug_name,
+                'dosage' => $medication->dosage,
+                'date' => now()
+            ],
+            'email' => $user->email,
+            'name' => $user->first_name . ' ' . $user->last_name,
+            'sending_type' => 'Verify Email',
+            'template' => 'emails/reminder'
+        ];
+
+        event(new SendmailEvent($details));
+        //send sms
+
+        $nextDueTime = $this->calculateNextReminder($reminder[0]->dosage_frequency);
+        
+        $history = new ReminderHistory();
+        $history->reminder_id = $reminder[0]->id;
+        $history->user_id = $user->id;
+        $history->reminded_at = $reminder[0]->next_reminder_at;
+        $history->save();
+        
+        $updatedReminder = Reminder::where('id', $reminder[0]->id)->first();
+        $updatedReminder->next_reminder_at = $nextDueTime;
+        $updatedReminder->save();
+
+        return true;
+    }
 
     public function calculateNextReminder($dosageFrequency) 
     {
-        $currentTime = time(); // Get current timestamp
+        // $currentTime = time(); // Get current timestamp
         switch ($dosageFrequency) {
             case 'ONCE_DAILY':
                 // Calculate next reminder in 24 hours (once a day)
-                return date('Y-m-d H:i:s', strtotime('+24 hours', $currentTime));
+                return strtotime('+24 hours');
                 break;
             case 'TWICE_DAILY':
                 // Calculate next reminder in 12 hours (twice a day)
-                return date('Y-m-d H:i:s', strtotime('+12 hours', $currentTime));
+                return strtotime('+12 hours');
                 break;
             case 'THRICE_DAILY':
                 // Calculate next reminder in 8 hours (three times a day)
-                return date('Y-m-d H:i:s', strtotime('+8 hours', $currentTime));
+                return strtotime('+8 hours');
                 break;
             // Add more cases for other dosage frequencies if needed
         }
