@@ -20,4 +20,8 @@ class Reminder extends Model
             $reminder->id = uniqid('REM');
         });
     }
+    public function medication()
+    {
+        return $this->belongsTo(Medication::class, 'medication_id');
+    }
 }

@@ -29,7 +29,7 @@ Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
 });
 
-Route::get('/get-something', [HospitalController::class, 'fetchHospital']);
+Route::get('/fetch-due-reminders', [RemindersController::class, 'fetchDueReminders']);
 
 Route::middleware('auth.api')->group(function () {
     Route::prefix('patient')->group(function () {
@@ -37,11 +37,14 @@ Route::middleware('auth.api')->group(function () {
         Route::get('/bio-data', [PatientController::class, 'fetchBioData']);
         Route::post('/set-reminder', [RemindersController::class, 'createReminderPatient']);
         Route::get('/medications', [RemindersController::class, 'getMedicationsPatient']);
+        Route::get('/reminder-history', [PatientController::class, 'reminderHistory']);
+        Route::get('/mark-reminder', [RemindersController::class, 'markReminder']);
     });
     Route::prefix('doctor')->group(function () {
         Route::get('/patients', [HospitalController::class, 'fetchHospitalPatients']);
         Route::get('/patients/bio-data', [HospitalController::class, 'fetchHospitalPatientsBioData']);
         Route::post('/patients/set-reminder', [RemindersController::class, 'createReminderDoctor']);
         Route::get('/patients/medications', [RemindersController::class, 'getMedicationsDoctor']);
+        Route::get('/patients/reminder-history', [HospitalController::class, 'getPatientReminderHistory']);
     });
 });

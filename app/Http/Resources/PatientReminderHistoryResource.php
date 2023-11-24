@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class PatientMedicationResource extends JsonResource
+class PatientReminderHistoryResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -27,12 +27,14 @@ class PatientMedicationResource extends JsonResource
                 break;
         }
         return [
-            'drug_name' => $this->name,
-            'dosage' => $this->dosage,
+            'history_id' => $this->id,
             'status' => $this->status,
+            'reminder_id' => $this->reminder->id,
+            'drug' => $this->reminder->medication->name,
+            'dosage' => $this->reminder->medication->dosage,
             'dosage_frequency' => $frequency,
-            'next_reminder' => date('Y-m-d H:i:s', $this->reminder->next_reminder_at),
-            'start_date' => $this->created_at->format('Y-m-d H:i:s')
+            'reminded_at' => date('Y-m-d H:i:s', $this->reminded_at),
+            'following_reminder' => date('Y-m-d H:i:s', $this->reminder->next_reminder_at),
         ];
     }
 }
