@@ -73,7 +73,7 @@ class HospitalController extends Controller
                         $query->where('users.id', auth()->id());
                     })->where('id', $request->patient_id)->first();
         $perPage = $request->perPage ?? 10;
-        $history = ReminderHistory::with(['reminder', 'reminder.medication'])->where('user_id', $patient->user_id);
+        $history = ReminderHistory::with(['reminder', 'reminder.medication'])->where('user_id', $patient->user_id)->orderBy('reminded_at', 'DESC');
         $data = $history->paginate($perPage);
         $countSkipped = (clone $history)->where('status', 'SKIPPED')->count();
         $countPending = (clone $history)->where('status', 'PENDING')->count();

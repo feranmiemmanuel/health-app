@@ -70,7 +70,7 @@ class PatientController extends Controller
     public function reminderHistory(Request $request)
     {
         $perPage = $request->perPage ?? 10;
-        $history = ReminderHistory::with(['reminder', 'reminder.medication'])->where('user_id', auth()->id());
+        $history = ReminderHistory::with(['reminder', 'reminder.medication'])->where('user_id', auth()->id())->orderBy('reminded_at', 'DESC');
         $data = $history->paginate($perPage);
         $countSkipped = (clone $history)->where('status', 'SKIPPED')->count();
         $countPending = (clone $history)->where('status', 'PENDING')->count();
