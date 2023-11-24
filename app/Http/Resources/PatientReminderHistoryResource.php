@@ -29,6 +29,7 @@ class PatientReminderHistoryResource extends JsonResource
         return [
             'history_id' => $this->id,
             'status' => $this->status,
+            'reminder_id' => $this->reminder->id,
             'drug' => $this->reminder->medication->name,
             'dosage' => $this->reminder->medication->dosage,
             'dosage_frequency' => $frequency,

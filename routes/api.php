@@ -38,6 +38,7 @@ Route::middleware('auth.api')->group(function () {
         Route::post('/set-reminder', [RemindersController::class, 'createReminderPatient']);
         Route::get('/medications', [RemindersController::class, 'getMedicationsPatient']);
         Route::get('/reminder-history', [PatientController::class, 'reminderHistory']);
+        Route::get('/mark-reminder', [RemindersController::class, 'markReminder']);
     });
     Route::prefix('doctor')->group(function () {
         Route::get('/patients', [HospitalController::class, 'fetchHospitalPatients']);

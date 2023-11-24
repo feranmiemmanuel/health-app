@@ -207,6 +207,7 @@ class RemindersController extends Controller
 
     public function fetchDueReminders()
     {
+        // return strtotime(now());
         dispatch(new FetchRemindersJob());
         return true;
     }
@@ -246,6 +247,89 @@ class RemindersController extends Controller
         $updatedReminder->save();
 
         return true;
+    }
+
+    public function updatePendingReminder($reminder)
+    {
+        $reminder1 = Reminder::with('medication')->where('id', $reminder[0]->id)->first();
+        $history = ReminderHistory::where('reminder_id', $reminder1->id)->first();
+        $history->status = 'SKIPPED';
+        $history->save();
+        $user = User::where('id', $reminder1->user_id)->first();
+        $details = [
+            'title' => 'New Reminder Update!',
+            'subject' => 'Reminder Update!',
+            'content' => [
+                'drug_name' => $reminder1->medication->name,
+                'dosage' => $reminder1->medication->dosage,
+                'status' => 'SKIPPED',
+                'date' => now()
+            ],
+            'email' => $user->email,
+            'name' => $user->first_name . ' ' . $user->last_name,
+            'sending_type' => 'Verify Email',
+            'template' => 'emails/markReminder'
+        ];
+
+        event(new SendmailEvent($details));
+        return true;
+    }
+
+    public function markReminder(Request $request)
+    {
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'reminder_id' => 'required|exists:reminders,id',
+                'status' => 'required|in:reminders,SKIP,TAKE'
+            ]
+        );
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'message' => $validator->errors()->first()], 400);
+        }
+        $status = '';
+        $message = '';
+        switch ($request->status) {
+            case 'SKIP':
+                $status = 'SKIPPED';
+                $message = 'Reminder Skipped Successfully';
+                break;
+            case 'TAKE':
+                $status = 'TAKEN';
+                $message = 'Reminder Adheared To Successfully';
+                break;
+        }
+        $reminder = Reminder::with('medication')->where('id', $request->reminder_id)->where('user_id', auth()->id())->first();
+        $history = ReminderHistory::where('reminder_id', $reminder->id)->first();
+        if (!$reminder) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Reminder Not Found'
+            ], 400);
+        }
+        $history->status = $status;
+        $history->save();
+
+        $details = [
+            'title' => 'New Reminder!',
+            'subject' => 'You ' . $status . ' your drugs',
+            'content' => [
+                'drug_name' => $reminder->medication->name,
+                'dosage' => $reminder->medication->dosage,
+                'status' => $status,
+                'date' => now()
+            ],
+            'email' => auth()->user()->email,
+            'name' => auth()->user()->first_name . ' ' . auth()->user()->last_name,
+            'sending_type' => 'Verify Email',
+            'template' => 'emails/markReminder'
+        ];
+
+        event(new SendmailEvent($details));
+        return response()->json([
+            'success' => true,
+            'message' => $message
+        ], 200);
     }
 
     public function calculateNextReminder($dosageFrequency) 
