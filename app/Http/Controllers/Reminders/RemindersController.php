@@ -85,7 +85,7 @@ class RemindersController extends Controller
     public function getMedicationsPatient(Request $request)
     {
         $perPage = $request->per_page ?? 10;
-        $medications = Medication::with('reminder')->where('user_id', auth()->id())->paginate($perPage);
+        $medications = Medication::with('reminder')->where('user_id', auth()->id())->orderBy('reminder.next_reminder_at', 'DESC')->paginate($perPage);
         return response()->json([
             'success' => true,
             'message' => 'Medications Fetched Successfully',
@@ -194,7 +194,10 @@ class RemindersController extends Controller
         }
 
         $perPage = $request->per_page ?? 10;
-        $medications = Medication::with('reminder')->where('user_id', $patient->user_id)->paginate($perPage);
+        $medications = Medication::with('reminder')->where('user_id', $patient->user_id)
+                                ->whereHas('reminder', function ($query) {
+                                    $query->orderBy('reminders.next_reminder_at', 'DESC');
+                                })->paginate($perPage);
         return response()->json([
             'success' => true,
             'message' => 'Medications Fetched Successfully',
