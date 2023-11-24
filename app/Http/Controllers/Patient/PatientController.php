@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Patient;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PatientBiodataResource;
+use App\Http\Resources\PatientReminderHistoryResource;
 use App\Models\Patient;
 use App\Models\ReminderHistory;
 use Illuminate\Http\Request;
@@ -63,7 +64,7 @@ class PatientController extends Controller
             'success' => true,
             'message' => 'Bio data fetched successfully',
             'data' => new PatientBiodataResource($patient)
-        ]);
+        ], 200);
     }
 
     public function reminderHistory(Request $request)
@@ -84,6 +85,11 @@ class PatientController extends Controller
             'no_of_adherance' => $history->where('status', 'TAKEN')->count(),
             'no_of_pending' => $history->where('status', 'PENDING')->count()
         ];
-        return $data;
+        return response()->json([
+            'success' => true,
+            'message' => 'Reminder History Fetched Successfully',
+            'stat' => $stat,
+            'history' => PatientReminderHistoryResource::collection($data)->response()->getData(true)
+        ]);
     }
 }

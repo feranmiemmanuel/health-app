@@ -44,5 +44,6 @@ Route::middleware('auth.api')->group(function () {
         Route::get('/patients/bio-data', [HospitalController::class, 'fetchHospitalPatientsBioData']);
         Route::post('/patients/set-reminder', [RemindersController::class, 'createReminderDoctor']);
         Route::get('/patients/medications', [RemindersController::class, 'getMedicationsDoctor']);
+        Route::get('/patients/reminder-history', [HospitalController::class, 'getPatientReminderHistory']);
     });
 });

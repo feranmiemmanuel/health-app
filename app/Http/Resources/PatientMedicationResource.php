@@ -31,7 +31,8 @@ class PatientMedicationResource extends JsonResource
             'dosage' => $this->dosage,
             'status' => $this->status,
             'dosage_frequency' => $frequency,
-            'next_reminder' => date('Y-m-d H:i:s', $this->reminder->next_reminder_at)
+            'next_reminder' => date('Y-m-d H:i:s', $this->reminder->next_reminder_at),
+            'start_date' => date('Y-m-d H:i:s', $this->created_at)
         ];
     }
 }
