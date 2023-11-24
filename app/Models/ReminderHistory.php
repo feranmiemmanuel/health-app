@@ -20,4 +20,8 @@ class ReminderHistory extends Model
             $reminderHistory->id = uniqid('HIS');
         });
     }
+    public function reminder()
+    {
+        return $this->belongsTo(Reminder::class, 'reminder_id');
+    }
 }
