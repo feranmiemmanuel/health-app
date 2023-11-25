@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Patient;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\NfcCardResource;
 use App\Http\Resources\PatientBiodataResource;
 use App\Http\Resources\PatientReminderHistoryResource;
 use App\Models\Patient;
@@ -90,6 +91,25 @@ class PatientController extends Controller
             'message' => 'Reminder History Fetched Successfully',
             'stat' => $stat,
             'history' => PatientReminderHistoryResource::collection($data)->response()->getData(true)
+        ]);
+    }
+
+    public function nfcCardBiodata(Request $request)
+    {
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'token' => 'required|exists:patients,patient_id',
+            ]
+        );
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'message' => $validator->errors()->first()], 400);
+        }
+        $patient = Patient::with('user')->where('patient_id', $request->token)->first();
+        return response()->json([
+            'success' => true,
+            'message' => 'Bio Data Fetched Successfully',
+            'data' => new NfcCardResource($patient)
         ]);
     }
 }
