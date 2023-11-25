@@ -207,7 +207,6 @@ class RemindersController extends Controller
 
     public function fetchDueReminders()
     {
-        // return strtotime(now());
         dispatch(new FetchRemindersJob());
         return true;
     }
@@ -351,5 +350,27 @@ class RemindersController extends Controller
                 break;
             // Add more cases for other dosage frequencies if needed
         }
+    }
+
+    public function reminderSimulator(Request $request)
+    {
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'email' => 'required|exists:users,email',
+            ]
+        );
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'message' => $validator->errors()->first()], 400);
+        }
+        $user = User::where('email', $request->email)->first();
+        $reminder = Reminder::with('medication')->where('user_id', $user->id)->orderBy('created_at', 'DESC')->first();
+        $reminder->next_reminder_at = strtotime(now());
+        $reminder->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Reminder Set To Now Successfully'
+        ]);
     }
 }
