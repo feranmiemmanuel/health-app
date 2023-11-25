@@ -31,21 +31,25 @@ class FetchRemindersJob implements ShouldQueue
      */
     public function handle(): void
     {
-        $reminders = Reminder::where('next_reminder_at', '<=', strtotime(now()))->get()->chunk(100);
-        foreach ($reminders as $reminder) {
-            Log::alert($reminder);
-            $history = ReminderHistory::where('reminder_id', $reminder[0]->id)->first();
-            $diffInMinutes = 0;
-            Log::alert($history);
-            if ($history && $history->status == 'PENDING') {
-                $creationTime = Carbon::createFromTimestamp($history->reminded_at);
-                $currentTime = Carbon::now();
-                $diffInMinutes = $currentTime->diffInMinutes($creationTime);
+        // process only active reminders
+        //put in pending once processed
+        $reminders = Reminder::where('next_reminder_at', '<=', strtotime(now()))->where('status', 'ACTIVE')->chunk(100, function($rems) {
+            foreach ($rems as $reminder) {
+                $reminder->status = 'PENDING';
+                $reminder->save();
+                $history = ReminderHistory::where('reminder_id', $reminder->id)->first();
+                $diffInMinutes = 0;
+                Log::alert($history);
+                if ($history && $history->status == 'PENDING') {
+                    $creationTime = Carbon::createFromTimestamp($history->reminded_at);
+                    $currentTime = Carbon::now();
+                    $diffInMinutes = $currentTime->diffInMinutes($creationTime);
+                }
+                if ($diffInMinutes > 3) {
+                    dispatch(new UpdatePendingReminderJob($reminder));
+                }
+                dispatch(new ProcessRemindersJob($reminder));
             }
-            if ($diffInMinutes > 3) {
-                dispatch(new UpdatePendingReminderJob($reminder));
-            }
-            dispatch(new ProcessRemindersJob($reminder));
-        }
+        });
     }
 }

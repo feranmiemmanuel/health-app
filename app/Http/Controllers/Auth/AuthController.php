@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use JWTAuth;
 use Carbon\Carbon;
 use App\Models\User;
+use App\Models\Doctor;
 use App\Models\Patient;
 use App\Models\Hospital;
 use App\Models\HospitalUser;
@@ -160,7 +161,8 @@ class AuthController extends Controller
                     'email' => 'required|string|email|max:255|unique:users,email',
                     'phone' => 'required|unique:users,phone',
                     'password' => 'required|string|confirmed|min:6',
-                    'hospital_id' => 'required|exists:hospitals,id'
+                    'hospital_id' => 'required|exists:hospitals,id',
+                    'id_no' => 'required|string|unique:doctors,doctor_id'
                 ]
             );
             if ($validator->fails()) {
@@ -180,9 +182,11 @@ class AuthController extends Controller
             $user = $user->refresh();
             // dd($user);
 
-            $patient = new Patient();
-            $patient->user_id = $userId;
-            $patient->save();
+            $doctor = new Doctor();
+            $doctor->user_id = $userId;
+            $doctor->status = 'ACTIVE';
+            $doctor->doctor_id = $request->id_no;
+            $doctor->save();
 
             $userHospital = new HospitalUser();
             $userHospital->doctor_id = $userId;
