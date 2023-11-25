@@ -214,8 +214,8 @@ class RemindersController extends Controller
 
     public function processDueReminder($reminder)
     {
-        $user = User::where('id', $reminder[0]->user_id)->first();
-        $medication = Medication::where('id', $reminder[0]->medication_id)->first();
+        $user = User::where('id', $reminder->user_id)->first();
+        $medication = Medication::where('id', $reminder->medication_id)->first();
         //send mail
         $details = [
             'title' => 'Reminder!',
@@ -234,16 +234,17 @@ class RemindersController extends Controller
         event(new SendmailEvent($details));
         //send sms
 
-        $nextDueTime = $this->calculateNextReminder($reminder[0]->dosage_frequency);
+        $nextDueTime = $this->calculateNextReminder($reminder->dosage_frequency);
         
         $history = new ReminderHistory();
-        $history->reminder_id = $reminder[0]->id;
+        $history->reminder_id = $reminder->id;
         $history->user_id = $user->id;
-        $history->reminded_at = $reminder[0]->next_reminder_at;
+        $history->reminded_at = $reminder->next_reminder_at;
         $history->save();
         
-        $updatedReminder = Reminder::where('id', $reminder[0]->id)->first();
+        $updatedReminder = Reminder::where('id', $reminder->id)->first();
         $updatedReminder->next_reminder_at = $nextDueTime;
+        $updatedReminder->status = 'ACTIVE';
         $updatedReminder->save();
 
         return true;
@@ -251,7 +252,7 @@ class RemindersController extends Controller
 
     public function updatePendingReminder($reminder)
     {
-        $reminder1 = Reminder::with('medication')->where('id', $reminder[0]->id)->first();
+        $reminder1 = Reminder::with('medication')->where('id', $reminder->id)->first();
         $history = ReminderHistory::where('reminder_id', $reminder1->id)->first();
         $history->status = 'SKIPPED';
         $history->save();

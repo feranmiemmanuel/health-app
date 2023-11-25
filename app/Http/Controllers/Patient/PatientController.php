@@ -81,9 +81,9 @@ class PatientController extends Controller
             'percentage_of_skipped' => $totalCount > 0 ? ($countSkipped / $totalCount) * 100 : 0,
             'percentage_of_pending' => $totalCount > 0 ? ($countPending / $totalCount) * 100 : 0,
             'percentage_adherence' => $totalCount > 0 ? ($countTaken / $totalCount) * 100 : 0,
-            'no_of_skipped' => $history->where('status', 'SKIPPED')->count(),
-            'no_of_adherance' => $history->where('status', 'TAKEN')->count(),
-            'no_of_pending' => $history->where('status', 'PENDING')->count()
+            'no_of_skipped' => (clone $history)->where('status', 'SKIPPED')->count(),
+            'no_of_adherance' => (clone $history)->where('status', 'TAKEN')->count(),
+            'no_of_pending' => (clone $history)->where('status', 'PENDING')->count()
         ];
         return response()->json([
             'success' => true,

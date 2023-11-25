@@ -31,10 +31,13 @@ class FetchRemindersJob implements ShouldQueue
      */
     public function handle(): void
     {
-        $reminders = Reminder::where('next_reminder_at', '<=', strtotime(now()))->get()->chunk(100);
+        // process only active reminders
+        //put in pending once processed
+        $reminders = Reminder::where('next_reminder_at', '<=', strtotime(now()))->where('status', 'ACTIVE')->chunk(100);
         foreach ($reminders as $reminder) {
-            Log::alert($reminder);
-            $history = ReminderHistory::where('reminder_id', $reminder[0]->id)->first();
+            $reminder->status = 'PENDING';
+            $reminder->save();
+            $history = ReminderHistory::where('reminder_id', $reminder->id)->first();
             $diffInMinutes = 0;
             Log::alert($history);
             if ($history && $history->status == 'PENDING') {
