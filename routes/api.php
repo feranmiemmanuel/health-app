@@ -32,6 +32,7 @@ Route::prefix('auth')->group(function () {
 Route::get('/fetch-due-reminders', [RemindersController::class, 'fetchDueReminders']);
 Route::get('/reminder-simulator', [RemindersController::class, 'reminderSimulator']);
 Route::get('/nfc-bio-data', [PatientController::class, 'nfcCardBiodata']);
+Route::get('/hospitals', [HospitalController::class, 'hospitals']);
 
 Route::middleware('auth.api')->group(function () {
     Route::prefix('patient')->group(function () {
