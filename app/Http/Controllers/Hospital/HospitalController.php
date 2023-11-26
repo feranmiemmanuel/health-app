@@ -10,6 +10,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\PatientsDataResource;
 use App\Http\Resources\HospitalPatientsDataResource;
+use App\Http\Resources\HospitalResource;
 use App\Http\Resources\PatientReminderHistoryResource;
 
 class HospitalController extends Controller
@@ -93,6 +94,16 @@ class HospitalController extends Controller
             'message' => 'Reminder History Fetched Successfully',
             'stat' => $stat,
             'history' => PatientReminderHistoryResource::collection($data)->response()->getData(true)
+        ]);
+    }
+
+    public function hospitals()
+    {
+        $hospitals = Hospital::all();
+        return response()->json([
+            'success' => true,
+            'message' => 'Hospitals Fetched Successfully',
+            'data' => HospitalResource::collection($hospitals)
         ]);
     }
 }

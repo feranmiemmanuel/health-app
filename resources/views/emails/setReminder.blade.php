@@ -11,7 +11,7 @@
                </p>
                <p style="font-family: 'Montserrat', sans-serif; mso-line-height-rule: exactly; margin: 0; margin-top: 24px; margin-bottom: 24px;">
                   <span style="font-weight: 600;">You </span>
-                  have a reminder set to take {{$content['dosage']}} dosage of {{$content['drug_name']}} {{$content['frequency']}}. You will receive notifications to serve as reminders for you. We're here to help🤩
+                  have a reminder set to take {{$content['dosage']}} dosage of {{$content['drug_name']}} {{$content['frequency']}}. You'd receive another mail any minute from now to serve as the first reminder after that, notifications will be sent to you at the particular time set to serve as reminders for you. We're here to help🤩
                </p>
                <table style="width: 100%;" cellpadding="0" cellspacing="0" role="presentation">
                   <tr>

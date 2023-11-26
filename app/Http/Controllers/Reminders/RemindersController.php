@@ -73,7 +73,10 @@ class RemindersController extends Controller
             'sending_type' => 'Verify Email',
             'template' => 'emails/setReminder'
         ];
-
+        $newRequest = new Request([
+            'email' => auth()->user()->email
+        ]);
+        $this->reminderSimulator($newRequest);
         event(new SendmailEvent($details));
 
         return response()->json([
@@ -161,7 +164,10 @@ class RemindersController extends Controller
             'sending_type' => 'Verify Email',
             'template' => 'emails/setReminder'
         ];
-
+        $newRequest = new Request([
+            'email' => $user->email
+        ]);
+        $this->reminderSimulator($newRequest);
         event(new SendmailEvent($details));
 
         return response()->json([
