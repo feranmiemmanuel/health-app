@@ -33,8 +33,6 @@ class SendEmailJob implements ShouldQueue
         $email         = $this->event->details['email'];
         $name          = $this->event->details['name'];
         $subject       = $this->event->details['subject'];
-        $content       = $this->event->details['content'];
-        $title         = $this->event->details['title'];
         $template      = $this->event->details['template'];
 
         $data = [
